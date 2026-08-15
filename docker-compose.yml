@@ -1,0 +1,42 @@
+services:
+  backend:
+    build: ./backend
+    container_name: authentication-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8080:8080"
+    networks:
+      - authentication-system
+    depends_on:
+      - postgres_db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://afzal:iamafzal@postgres_db:5432/authentication_db
+      - REDIS_URL=redis://redis:6379
+
+  redis:
+    image: redis
+    ports:
+      - "6381:6379"
+    container_name: authentication-redis
+    restart: unless-stopped
+    networks:
+      - authentication-system
+
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: postgres_service
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=afzal
+      - POSTGRES_PASSWORD=iamafzal
+      - POSTGRES_DB=authentication_db
+    ports:
+      - "5433 :5432"
+    networks:
+      - authentication-system
+
+networks:
+  authentication-system:
+    driver: bridge
